@@ -1,0 +1,9 @@
+body {
+  background: red;
+}
+
+#hanka {
+  border: solid 3px white;
+  width: 300px;
+  height: 400px;
+}
