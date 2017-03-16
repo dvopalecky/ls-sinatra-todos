@@ -1,0 +1,17 @@
+<header id="todos">
+  <%= @list[:name] %>
+</header>
+
+<% if @list[:todos].empty? %>
+  <p>No todos in this list. Add a first one.</p>
+<% else %>
+  <ul id="todos">
+    <% @list[:todos].each do |todo| %>
+    <li>
+      <a>
+        <h2><%= todo %></h2>
+      </a>
+    </li>
+    <% end %>
+  </ul>
+<% end %>
