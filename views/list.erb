@@ -1,17 +1,37 @@
-<header id="todos">
-  <%= @list[:name] %>
-</header>
+<section id="todos">
+  <header>
+    <h2>
+      <%= @list[:name] %>
+    </h2>
+    <ul>
+      <li>
+        <a class="edit" href="/lists/<%= params[:id] %>/edit">Edit list</a>
+      </li>
+    </ul>
+  </header>
 
-<% if @list[:todos].empty? %>
-  <p>No todos in this list. Add a first one.</p>
-<% else %>
-  <ul id="todos">
-    <% @list[:todos].each do |todo| %>
-    <li>
-      <a>
-        <h2><%= todo %></h2>
+  <% if @list[:todos].empty? %>
+    <p>
+      <a href="/lists/<%= params[:id] %>/new">
+        No todos in this list. Add a first one.
       </a>
-    </li>
-    <% end %>
-  </ul>
+    </p>
+  <% else %>
+    <ul id="todos">
+      <% @list[:todos].each do |todo| %>
+      <li>
+        <a>
+          <h2><%= todo %></h2>
+        </a>
+      </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+
+</section>
+
+<% content_for :header_links do %>
+  <a href="/lists">All lists</a>
+
 <% end %>
