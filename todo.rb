@@ -29,12 +29,19 @@ get '/lists/new' do
   erb :new_list
 end
 
-# Return an error message if list name invalid, otherwise return nil
+# Return an error message if list name is invalid, otherwise return nil
 def error_for_list_name(name)
   if !(1..100).cover?(name.size)
-    'List name must be 1 to 100 characters long!'
+    "List name must be 1 to 100 characters long!"
   elsif session[:lists].map { |v| v[:name] }.include?(name)
-    'List name must be unique!'
+    "List name must be unique!"
+  end
+end
+
+# Return an error message if todo is invalid, otherwise return nil
+def error_for_todo(name)
+  if !(1..100).cover?(name.size)
+    "Todo must be 1 to 100 characters long!"
   end
 end
 
@@ -54,8 +61,8 @@ end
 
 # View all todos for given list
 get '/lists/:id' do
-  @id = params[:id].to_i
-  @list = session[:lists][@id]
+  @list_id = params[:id].to_i
+  @list = session[:lists][@list_id]
   if @list
     erb :list
   else
@@ -94,5 +101,21 @@ post '/lists/:id' do
     @list[:name] = edited_list_name
     session[:success] = "List #{edited_list_name} renamed successfully."
     redirect "/lists/#{@id}"
+  end
+end
+
+# Add new todo to a list
+post '/lists/:list_id/todos' do
+  @list_id = params[:list_id].to_i
+  @list = session[:lists][@list_id]
+  todo = params[:todo].strip
+  error = error_for_todo(todo)
+  if error
+    session[:error] = error
+    erb :list
+  else
+    @list[:todos] << { name: todo, done: false }
+    session[:success] = "Todo '#{todo}' was added."
+    redirect "/lists/#{@list_id}"
   end
 end

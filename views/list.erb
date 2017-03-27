@@ -5,29 +5,38 @@
     </h2>
     <ul>
       <li>
-        <a class="edit" href="/lists/<%= params[:id] %>/edit">Edit list</a>
+        <a class="edit" href="/lists/<%= @list_id %>/edit">Edit list</a>
       </li>
     </ul>
   </header>
 
   <% if @list[:todos].empty? %>
     <p>
-      <a href="/lists/<%= params[:id] %>/new">
-        No todos in this list. Add a first one.
-      </a>
+      No todos in this list. Add a first one below
     </p>
   <% else %>
     <ul id="todos">
       <% @list[:todos].each do |todo| %>
       <li>
-        <a>
-          <h2><%= todo %></h2>
-        </a>
+        <h3><%= todo[:name] %></h3>
       </li>
       <% end %>
     </ul>
   <% end %>
 
+  <form action="/lists/<%= @list_id %>/todos" method="post">
+    <dl>
+      <dt>
+        <label for="todo">Enter a new todo item:</label>
+      </dt>
+      <dd>
+        <input name="todo" placeholder="Something to do" type="text" value="<%= params[:todo] %>">
+      </dd>
+    </dl>
+    <fieldset class="actions">
+      <input type="submit" value="Add">
+    </fieldset>
+  </form>
 
 </section>
 
