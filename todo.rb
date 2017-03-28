@@ -129,3 +129,16 @@ post '/lists/:list_id/todos/:todo_id/delete' do
   session[:success] = "Todo '#{todo[:name]}' deleted successfully."
   redirect "/lists/#{@list_id}"
 end
+
+# Check/Uncheck a todo in a list
+post '/lists/:list_id/todos/:todo_id' do
+  @list_id = params[:list_id].to_i
+  todo_id = params[:todo_id].to_i
+  todo = session[:lists][@list_id][:todos][todo_id]
+
+  todo[:done] = (params[:completed] == 'true')
+  status = todo[:done] ? "complete" : "incomplete"
+
+  session[:success] = "Todo '#{todo[:name]}' is now #{status}."
+  redirect "/lists/#{@list_id}"
+end
