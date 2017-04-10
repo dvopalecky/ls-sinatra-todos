@@ -1,3 +1,7 @@
+# todo:
+# - focus the cursor on the field to add new todos
+
+
 #  Completed project reference: https://ls-170-sinatra-todos.herokuapp.com/
 
 require 'sinatra'
@@ -120,6 +124,17 @@ post '/lists/:list_id/todos' do
   end
 end
 
+# Check all todos in a list
+post '/lists/:list_id/complete_all' do
+  @list_id = params[:list_id].to_i
+  session[:lists][@list_id][:todos].each do |todo|
+    todo[:done] = true
+  end
+
+  session[:success] = "All todos marked as complete."
+  redirect "/lists/#{@list_id}"
+end
+
 # Delete a todo from a list
 post '/lists/:list_id/todos/:todo_id/delete' do
   @list_id = params[:list_id].to_i
@@ -139,6 +154,6 @@ post '/lists/:list_id/todos/:todo_id' do
   todo[:done] = (params[:completed] == 'true')
   status = todo[:done] ? "complete" : "incomplete"
 
-  session[:success] = "Todo '#{todo[:name]}' is now #{status}."
+  session[:success] = "Todo '#{todo[:name]}' marked as #{status}."
   redirect "/lists/#{@list_id}"
 end

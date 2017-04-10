@@ -4,6 +4,13 @@
       <%= @list[:name] %>
     </h2>
     <ul>
+      <% if @list[:todos].any?{ |todo| !todo[:done] } %>
+      <li>
+        <form action="/lists/<%= @list_id %>/complete_all" method="post">
+          <button type="submit" class="check">Complete all</button>
+        </form>
+      </li>
+      <% end %>
       <li>
         <a class="edit" href="/lists/<%= @list_id %>/edit">Edit list</a>
       </li>
