@@ -49,6 +49,10 @@ def error_for_todo(name)
   end
 end
 
+def complete?(list)
+  list[:todos].all?{ |todo| todo[:done] } && !list[:todos].empty?
+end
+
 # Create a new list
 post '/lists' do
   list_name = params[:list_name].strip
