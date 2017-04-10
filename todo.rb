@@ -1,6 +1,6 @@
 # todo:
 # - focus the cursor on the field to add new todos
-
+# - helper methods seem to be callable from ERB templates even though I don't define the helper functions in the helpers block
 
 #  Completed project reference: https://ls-170-sinatra-todos.herokuapp.com/
 
@@ -13,6 +13,26 @@ configure do
   enable :sessions
   set :session_secret, 'secret'
 end
+
+helpers do
+  def complete?(list)
+    todos_remaining_count(list).zero? && todos_count(list) > 0
+  end
+
+  def list_class(list)
+    "complete" if complete?(list)
+  end
+
+  def todos_remaining_count(list)
+    list[:todos].count{ |todo| !todo[:done] }
+  end
+
+  def todos_count(list)
+    list[:todos].size
+  end
+
+end
+
 
 before do
   session[:lists] ||= []
@@ -47,10 +67,6 @@ def error_for_todo(name)
   if !(1..100).cover?(name.size)
     "Todo must be 1 to 100 characters long!"
   end
-end
-
-def complete?(list)
-  list[:todos].all?{ |todo| todo[:done] } && !list[:todos].empty?
 end
 
 # Create a new list
