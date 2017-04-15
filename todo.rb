@@ -1,3 +1,5 @@
+# Simple Todo App with lists of todos
+
 require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'sinatra/content_for'
@@ -14,27 +16,27 @@ helpers do
   end
 
   def list_class(list)
-    "complete" if complete?(list)
+    'complete' if complete?(list)
   end
 
   def todos_remaining_count(list)
-    list[:todos].count{ |todo| !todo[:done] }
+    list[:todos].count { |todo| !todo[:done] }
   end
 
   def todos_count(list)
     list[:todos].size
   end
 
-  def sort_lists(lists, &block)
+  def sort_lists(lists)
     complete, incomplete = lists.partition { |list| complete?(list) }
-    incomplete.each { |list| yield list, lists.index(list)}
-    complete.each { |list| yield list, lists.index(list)}
+    incomplete.each { |list| yield list, lists.index(list) }
+    complete.each { |list| yield list, lists.index(list) }
   end
 
-  def sort_todos(todos, &block)
+  def sort_todos(todos)
     complete, incomplete = todos.partition { |todo| todo[:done] }
-    incomplete.each { |todo| yield todo, todos.index(todo)}
-    complete.each { |todo| yield todo, todos.index(todo)}
+    incomplete.each { |todo| yield todo, todos.index(todo) }
+    complete.each { |todo| yield todo, todos.index(todo) }
   end
 end
 
@@ -43,6 +45,10 @@ before do
 end
 
 get '/' do
+  redirect '/lists'
+end
+
+not_found do
   redirect '/lists'
 end
 
@@ -60,17 +66,15 @@ end
 # Return an error message if list name is invalid, otherwise return nil
 def error_for_list_name(name)
   if !(1..100).cover?(name.size)
-    "List name must be 1 to 100 characters long!"
+    'List name must be 1 to 100 characters long!'
   elsif session[:lists].map { |v| v[:name] }.include?(name)
-    "List name must be unique!"
+    'List name must be unique!'
   end
 end
 
 # Return an error message if todo is invalid, otherwise return nil
 def error_for_todo(name)
-  if !(1..100).cover?(name.size)
-    "Todo must be 1 to 100 characters long!"
-  end
+  'Todo must be 1 to 100 characters long!' unless (1..100).cover?(name.size)
 end
 
 # Create a new list
@@ -82,7 +86,7 @@ post '/lists' do
     erb :new_list
   else
     session[:lists] << { name: list_name, todos: [] }
-    session[:success] = "List #{list_name} created successfully."
+    session[:success] = "List '#{list_name}' created successfully."
     redirect '/lists'
   end
 end
@@ -94,7 +98,7 @@ get '/lists/:id' do
   if @list
     erb :list
   else
-    session[:error] = "The specified list was not found."
+    session[:error] = 'The specified list was not found.'
     redirect '/lists'
   end
 end
@@ -110,8 +114,8 @@ end
 post '/lists/:id/delete' do
   id = params[:id].to_i
   @list = session[:lists].delete_at(id)
-  session[:success] = "List #{@list[:name]} deleted successfully."
-  redirect "/lists"
+  session[:success] = "List '#{@list[:name]}' deleted successfully."
+  redirect '/lists'
 end
 
 # Update existing list
@@ -127,7 +131,7 @@ post '/lists/:id' do
     erb :edit_list
   else
     @list[:name] = edited_list_name
-    session[:success] = "List #{edited_list_name} renamed successfully."
+    session[:success] = "List '#{edited_list_name}' renamed successfully."
     redirect "/lists/#{@id}"
   end
 end
@@ -155,7 +159,7 @@ post '/lists/:list_id/complete_all' do
     todo[:done] = true
   end
 
-  session[:success] = "All todos marked as complete."
+  session[:success] = 'All todos marked as complete.'
   redirect "/lists/#{@list_id}"
 end
 
@@ -176,7 +180,7 @@ post '/lists/:list_id/todos/:todo_id' do
   todo = session[:lists][@list_id][:todos][todo_id]
 
   todo[:done] = (params[:completed] == 'true')
-  status = todo[:done] ? "complete" : "incomplete"
+  status = todo[:done] ? 'complete' : 'incomplete'
 
   session[:success] = "Todo '#{todo[:name]}' marked as #{status}."
   redirect "/lists/#{@list_id}"

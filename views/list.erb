@@ -17,11 +17,7 @@
     </ul>
   </header>
 
-  <% if @list[:todos].empty? %>
-    <p>
-      No todos in this list. Add a first one below
-    </p>
-  <% else %>
+  <% if !@list[:todos].empty? %>
     <ul id="todos">
       <% sort_todos(@list[:todos]) do |todo, todo_idx| %>
       <% if todo[:done] %>
