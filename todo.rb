@@ -77,6 +77,16 @@ def error_for_todo(name)
   'Todo must be 1 to 100 characters long!' unless (1..100).cover?(name.size)
 end
 
+# Returns an error if list is not found and the list if it is
+def check_list(list)
+  if list
+    list
+  else
+    session[:error] = 'The specified list was not found.'
+    redirect '/lists'
+  end
+end
+
 # Create a new list
 post '/lists' do
   list_name = params[:list_name].strip
@@ -94,19 +104,14 @@ end
 # View all todos for given list
 get '/lists/:id' do
   @list_id = params[:id].to_i
-  @list = session[:lists][@list_id]
-  if @list
-    erb :list
-  else
-    session[:error] = 'The specified list was not found.'
-    redirect '/lists'
-  end
+  @list = check_list(session[:lists][@list_id])
+  erb :list
 end
 
 # Edit existing list
 get '/lists/:id/edit' do
-  @id = params[:id].to_i
-  @list = session[:lists][@id]
+  @list_id = params[:id].to_i
+  @list = check_list(session[:lists][@list_id])
   erb :edit_list
 end
 
@@ -120,19 +125,18 @@ end
 
 # Update existing list
 post '/lists/:id' do
-  @id = params[:id].to_i
-  @list = session[:lists][@id]
+  @list_id = params[:id].to_i
+  @list = session[:lists][@list_id]
 
   edited_list_name = params[:list_name].strip
   error = error_for_list_name(edited_list_name)
   if error
     session[:error] = error
-
     erb :edit_list
   else
     @list[:name] = edited_list_name
     session[:success] = "List '#{edited_list_name}' renamed successfully."
-    redirect "/lists/#{@id}"
+    redirect "/lists/#{@list_id}"
   end
 end
 
@@ -154,34 +158,33 @@ end
 
 # Check all todos in a list
 post '/lists/:list_id/complete_all' do
-  @list_id = params[:list_id].to_i
-  session[:lists][@list_id][:todos].each do |todo|
+  list_id = params[:list_id].to_i
+  session[:lists][list_id][:todos].each do |todo|
     todo[:done] = true
   end
 
   session[:success] = 'All todos marked as complete.'
-  redirect "/lists/#{@list_id}"
+  redirect "/lists/#{list_id}"
 end
 
 # Delete a todo from a list
 post '/lists/:list_id/todos/:todo_id/delete' do
-  @list_id = params[:list_id].to_i
-  @todo_id = params[:todo_id].to_i
-  todo = session[:lists][@list_id][:todos].delete_at(@todo_id)
-
+  list_id = params[:list_id].to_i
+  todo_id = params[:todo_id].to_i
+  todo = session[:lists][list_id][:todos].delete_at(todo_id)
   session[:success] = "Todo '#{todo[:name]}' deleted successfully."
-  redirect "/lists/#{@list_id}"
+  redirect "/lists/#{list_id}"
 end
 
 # Check/Uncheck a todo in a list
 post '/lists/:list_id/todos/:todo_id' do
-  @list_id = params[:list_id].to_i
+  list_id = params[:list_id].to_i
   todo_id = params[:todo_id].to_i
-  todo = session[:lists][@list_id][:todos][todo_id]
+  todo = session[:lists][list_id][:todos][todo_id]
 
   todo[:done] = (params[:completed] == 'true')
   status = todo[:done] ? 'complete' : 'incomplete'
 
   session[:success] = "Todo '#{todo[:name]}' marked as #{status}."
-  redirect "/lists/#{@list_id}"
+  redirect "/lists/#{list_id}"
 end
