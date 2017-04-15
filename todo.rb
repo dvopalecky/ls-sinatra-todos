@@ -1,9 +1,3 @@
-# todo:
-# - focus the cursor on the field to add new todos
-# - helper methods seem to be callable from ERB templates even though I don't define the helper functions in the helpers block
-
-#  Completed project reference: https://ls-170-sinatra-todos.herokuapp.com/
-
 require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'sinatra/content_for'
