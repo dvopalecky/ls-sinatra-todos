@@ -23,7 +23,7 @@
     </p>
   <% else %>
     <ul id="todos">
-      <% @list[:todos].each_with_index do |todo, todo_idx| %>
+      <% sort_todos(@list[:todos]) do |todo, todo_idx| %>
       <% if todo[:done] %>
         <li class="complete">
       <% else %>

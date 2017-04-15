@@ -31,8 +31,18 @@ helpers do
     list[:todos].size
   end
 
-end
+  def sort_lists(lists, &block)
+    complete, incomplete = lists.partition { |list| complete?(list) }
+    incomplete.each { |list| yield list, lists.index(list)}
+    complete.each { |list| yield list, lists.index(list)}
+  end
 
+  def sort_todos(todos, &block)
+    complete, incomplete = todos.partition { |todo| todo[:done] }
+    incomplete.each { |todo| yield todo, todos.index(todo)}
+    complete.each { |todo| yield todo, todos.index(todo)}
+  end
+end
 
 before do
   session[:lists] ||= []
