@@ -13,7 +13,7 @@ end
 
 helpers do
   def complete?(list)
-    todos_remaining_count(list).zero? && todos_count(list) > 0
+    todos_count(list) > 0 && todos_remaining_count(list).zero?
   end
 
   def list_class(list)
@@ -121,8 +121,13 @@ end
 post '/lists/:id/delete' do
   id = params[:id].to_i
   @list = session[:lists].delete_at(id)
-  session[:success] = "List '#{@list[:name]}' deleted successfully."
-  redirect '/lists'
+  if env['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest"
+    # ajax
+    "/lists"
+  else
+    session[:success] = "List '#{@list[:name]}' deleted successfully."
+    redirect '/lists'
+  end
 end
 
 # Update existing list
@@ -176,8 +181,14 @@ post '/lists/:list_id/todos/:todo_id/delete' do
   list = load_list(list_id)
   todo_id = params[:todo_id].to_i
   todo = list[:todos].delete_at(todo_id)
-  session[:success] = "Todo '#{todo[:name]}' deleted successfully."
-  redirect "/lists/#{list_id}"
+  if env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
+    # ajax
+    status 204
+  else
+    session[:success] = "Todo '#{todo[:name]}' deleted successfully."
+    redirect "/lists/#{list_id}"
+  end
+
 end
 
 # Check/Uncheck a todo in a list

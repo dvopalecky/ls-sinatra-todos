@@ -5,7 +5,8 @@
     </h2>
     <ul>
       <li>
-        <form action="/lists/<%= @list_id %>/delete" method="post">
+        <form action="/lists/<%= @list_id %>/delete" class="delete"
+            method="post">
           <button type="submit" class="delete">
             Delete list
           </button>
@@ -21,7 +22,7 @@
       </dt>
       <dd>
         <input name="list_name" placeholder="List Name" type="text"
-          value="<%= params[:list_name] || @list[:name] %>" autofocus>
+          value="<%= @list[:name] %>" autofocus>
       </dd>
     </dl>
     <fieldset class="actions">
