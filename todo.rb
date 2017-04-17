@@ -28,10 +28,11 @@ helpers do
     list[:todos].size
   end
 
-  def sort_lists(lists)
+  def sort_lists(lists, &block)
     complete, incomplete = lists.partition { |list| complete?(list) }
-    incomplete.each { |list| yield list, lists.index(list) }
-    complete.each { |list| yield list, lists.index(list) }
+
+    incomplete.each(&block)
+    complete.each(&block)
   end
 
   def sort_todos(todos, &block)
@@ -57,8 +58,8 @@ def error_for_todo(name)
 end
 
 # Returns an error if list is not found and the list if it is
-def load_list(index)
-  list = session[:lists][index] if index
+def load_list(id)
+  list = session[:lists].find { |list| list[:id] == id }
   if list
     list
   else
@@ -67,8 +68,8 @@ def load_list(index)
   end
 end
 
-def new_todo_id(todos)
-  max = todos.map { |todo| todo[:id] }.max || 0
+def new_id(todos_or_lists)
+  max = todos_or_lists.map { |item| item[:id] }.max || 0
   max + 1
 end
 
@@ -103,7 +104,8 @@ post '/lists' do
     session[:error] = error
     erb :new_list
   else
-    session[:lists] << { name: list_name, todos: [] }
+    id = new_id(session[:lists])
+    session[:lists] << { id: id, name: list_name, todos: [] }
     session[:success] = "List '#{list_name}' created successfully."
     redirect '/lists'
   end
@@ -111,22 +113,23 @@ end
 
 # View all todos for given list
 get '/lists/:id' do
-  @list_id = params[:id].to_i
-  @list = load_list(@list_id)
+  list_id = params[:id].to_i
+  @list = load_list(list_id)
   erb :list
 end
 
 # Edit existing list
 get '/lists/:id/edit' do
-  @list_id = params[:id].to_i
-  @list = load_list(@list_id)
+  list_id = params[:id].to_i
+  @list = load_list(list_id)
   erb :edit_list
 end
 
 # Delete existing list
 post '/lists/:id/delete' do
-  id = params[:id].to_i
-  @list = session[:lists].delete_at(id)
+  list_id = params[:id].to_i
+  @list = load_list(list_id)
+  session[:lists].delete(@list)
   if env['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest"
     # ajax
     "/lists"
@@ -138,8 +141,8 @@ end
 
 # Update existing list
 post '/lists/:id' do
-  @list_id = params[:id].to_i
-  @list = load_list(@list_id)
+  list_id = params[:id].to_i
+  @list = load_list(list_id)
 
   edited_list_name = params[:list_name].strip
   error = error_for_list_name(edited_list_name)
@@ -149,24 +152,24 @@ post '/lists/:id' do
   else
     @list[:name] = edited_list_name
     session[:success] = "List '#{edited_list_name}' renamed successfully."
-    redirect "/lists/#{@list_id}"
+    redirect "/lists/#{@list[:id]}"
   end
 end
 
 # Add new todo to a list
 post '/lists/:list_id/todos' do
-  @list_id = params[:list_id].to_i
-  @list = load_list(@list_id)
+  list_id = params[:list_id].to_i
+  @list = load_list(list_id)
   todo = params[:todo].strip
   error = error_for_todo(todo)
   if error
     session[:error] = error
     erb :list
   else
-    id = new_todo_id(@list[:todos])
+    id = new_id(@list[:todos])
     @list[:todos] << { id: id, name: todo, done: false }
     session[:success] = "Todo '#{todo}' was added."
-    redirect "/lists/#{@list_id}"
+    redirect "/lists/#{@list[:id]}"
   end
 end
 
