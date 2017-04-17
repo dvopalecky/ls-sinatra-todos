@@ -34,10 +34,11 @@ helpers do
     complete.each { |list| yield list, lists.index(list) }
   end
 
-  def sort_todos(todos)
+  def sort_todos(todos, &block)
     complete, incomplete = todos.partition { |todo| todo[:done] }
-    incomplete.each { |todo| yield todo, todos.index(todo) }
-    complete.each { |todo| yield todo, todos.index(todo) }
+
+    incomplete.each(&block)
+    complete.each(&block)
   end
 end
 
@@ -87,6 +88,11 @@ def load_list(index)
     session[:error] = 'The specified list was not found.'
     redirect '/lists'
   end
+end
+
+def new_todo_id(todos)
+  max = todos.map { |todo| todo[:id] }.max || 0
+  max + 1
 end
 
 # Create a new list
@@ -157,7 +163,8 @@ post '/lists/:list_id/todos' do
     session[:error] = error
     erb :list
   else
-    @list[:todos] << { name: todo, done: false }
+    id = new_todo_id(@list[:todos])
+    @list[:todos] << { id: id, name: todo, done: false }
     session[:success] = "Todo '#{todo}' was added."
     redirect "/lists/#{@list_id}"
   end
@@ -180,12 +187,12 @@ post '/lists/:list_id/todos/:todo_id/delete' do
   list_id = params[:list_id].to_i
   list = load_list(list_id)
   todo_id = params[:todo_id].to_i
-  todo = list[:todos].delete_at(todo_id)
+  list[:todos].reject! { |todo| todo[:id] == todo_id }
   if env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
     # ajax
     status 204
   else
-    session[:success] = "Todo '#{todo[:name]}' deleted successfully."
+    session[:success] = 'Todo deleted successfully.'
     redirect "/lists/#{list_id}"
   end
 
@@ -196,7 +203,7 @@ post '/lists/:list_id/todos/:todo_id' do
   list_id = params[:list_id].to_i
   list = load_list(list_id)
   todo_id = params[:todo_id].to_i
-  todo = list[:todos][todo_id]
+  todo = list[:todos].find { |todo| todo[:id] == todo_id }
 
   todo[:done] = (params[:completed] == 'true')
   status = todo[:done] ? 'complete' : 'incomplete'

@@ -19,20 +19,20 @@
 
   <% if !@list[:todos].empty? %>
     <ul id="todos">
-      <% sort_todos(@list[:todos]) do |todo, todo_idx| %>
+      <% sort_todos(@list[:todos]) do |todo| %>
       <% if todo[:done] %>
         <li class="complete">
       <% else %>
         <li>
       <% end %>
-        <form action="/lists/<%= @list_id %>/todos/<%= todo_idx%>"
+        <form action="/lists/<%= @list_id %>/todos/<%= todo[:id]%>"
             method="post" class="check">
           <input type="hidden" name="completed" value="<%= !todo[:done]%>">
           <button type="submit">Complete</button>
         </form>
 
         <h3><%= todo[:name] %></h3>
-        <form action="/lists/<%= @list_id %>/todos/<%= todo_idx%>/delete"
+        <form action="/lists/<%= @list_id %>/todos/<%= todo[:id]%>/delete"
             method="post" class="delete">
           <button type="submit">Delete</button>
         </form>
