@@ -42,29 +42,6 @@ helpers do
   end
 end
 
-before do
-  session[:lists] ||= []
-end
-
-get '/' do
-  redirect '/lists'
-end
-
-not_found do
-  redirect '/lists'
-end
-
-# View all of lists
-get '/lists' do
-  @lists = session[:lists]
-  erb :lists
-end
-
-# Render the new list form
-get '/lists/new' do
-  erb :new_list
-end
-
 # Return an error message if list name is invalid, otherwise return nil
 def error_for_list_name(name)
   if !(1..100).cover?(name.size)
@@ -93,6 +70,29 @@ end
 def new_todo_id(todos)
   max = todos.map { |todo| todo[:id] }.max || 0
   max + 1
+end
+
+before do
+  session[:lists] ||= []
+end
+
+get '/' do
+  redirect '/lists'
+end
+
+not_found do
+  redirect '/lists'
+end
+
+# View all of lists
+get '/lists' do
+  @lists = session[:lists]
+  erb :lists
+end
+
+# Render the new list form
+get '/lists/new' do
+  erb :new_list
 end
 
 # Create a new list
