@@ -8,7 +8,7 @@ require 'tilt/erubis'
 configure do
   enable :sessions
   set :session_secret, 'secret'
-  set :erb, :escape_html => true
+  set :erb, escape_html: true
 end
 
 helpers do
@@ -59,9 +59,9 @@ end
 
 # Returns an error if list is not found and the list if it is
 def load_list(id)
-  list = session[:lists].find { |list| list[:id] == id }
-  if list
-    list
+  loaded_list = session[:lists].find { |list| list[:id] == id }
+  if loaded_list
+    loaded_list
   else
     session[:error] = 'The specified list was not found.'
     redirect '/lists'
@@ -130,9 +130,9 @@ post '/lists/:id/delete' do
   list_id = params[:id].to_i
   @list = load_list(list_id)
   session[:lists].delete(@list)
-  if env['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest"
+  if env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
     # ajax
-    "/lists"
+    '/lists'
   else
     session[:success] = "List '#{@list[:name]}' deleted successfully."
     redirect '/lists'
@@ -198,7 +198,6 @@ post '/lists/:list_id/todos/:todo_id/delete' do
     session[:success] = 'Todo deleted successfully.'
     redirect "/lists/#{list_id}"
   end
-
 end
 
 # Check/Uncheck a todo in a list
@@ -206,7 +205,7 @@ post '/lists/:list_id/todos/:todo_id' do
   list_id = params[:list_id].to_i
   list = load_list(list_id)
   todo_id = params[:todo_id].to_i
-  todo = list[:todos].find { |todo| todo[:id] == todo_id }
+  todo = list[:todos].find { |td| td[:id] == todo_id }
 
   todo[:done] = (params[:completed] == 'true')
   status = todo[:done] ? 'complete' : 'incomplete'
